@@ -7,6 +7,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+
+  <!--
+  ╔══════════════════════════════════════════════════════╗
+  ║  마무리 체크리스트 수정 구역 (여기만 편집하면 됩니다)  ║
+  ╚══════════════════════════════════════════════════════╝
+  - 마크다운 형식으로 자유롭게 수정하세요
+  - ## 로 섹션 구분, - [ ] 로 체크박스 항목 추가
+  -->
+  <script id="checklist-source" type="text/plain">
+## 문서 품질
+- [ ] 문서의 형식을 잘 맞추었나요?
+- [ ] 기존 문서의 데이터를 삭제하였나요?
+
+## 테스트
+- [ ] TC 진행 시 더 진행할 테스트 항목을 생각하였나요?
+  </script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -61,308 +79,142 @@
       padding: 2rem 1rem;
     }
 
-    .container {
-      width: 100%;
-      max-width: 480px;
-    }
-
+    .container { width: 100%; max-width: 480px; }
     .page { display: none; }
     .page.active { display: block; }
 
-    /* Header */
-    .header {
-      margin-bottom: 2rem;
-    }
-    .header-label {
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-hint);
-      margin-bottom: 4px;
-    }
-    .header-title {
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
+    .header { margin-bottom: 2rem; }
+    .header-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 4px; }
+    .header-title { font-size: 22px; font-weight: 600; color: var(--text-primary); }
 
-    /* Card */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 12px;
-    }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 12px; }
 
-    .field-label {
-      font-size: 11px;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: var(--text-hint);
-      margin-bottom: 10px;
-    }
+    .field-label { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 10px; }
 
-    /* Period toggle */
-    .period-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 1.25rem;
-    }
-    .period-btn {
-      padding: 10px;
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-sm);
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 14px;
-      font-family: inherit;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
+    .period-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
+    .period-btn { padding: 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font-size: 14px; font-family: inherit; font-weight: 500; cursor: pointer; transition: all 0.15s; }
     .period-btn:hover { background: var(--bg); }
-    .period-btn.active {
-      background: var(--accent-bg);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+    .period-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
 
-    /* Time select */
-    .time-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .time-row select {
-      padding: 9px 12px;
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-sm);
-      background: var(--surface);
-      color: var(--text-primary);
-      font-size: 15px;
-      font-family: inherit;
-      font-weight: 500;
-      cursor: pointer;
-      appearance: none;
-      -webkit-appearance: none;
-      min-width: 70px;
-      text-align: center;
-    }
+    .time-row { display: flex; align-items: center; gap: 10px; }
+    .time-row select { padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-primary); font-size: 15px; font-family: inherit; font-weight: 500; cursor: pointer; appearance: none; -webkit-appearance: none; min-width: 70px; text-align: center; }
     .time-row select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
     .time-unit { font-size: 14px; color: var(--text-secondary); }
 
-    /* Textarea */
-    textarea {
-      width: 100%;
-      min-height: 96px;
-      resize: vertical;
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-sm);
-      padding: 10px 12px;
-      font-size: 14px;
-      font-family: inherit;
-      background: var(--surface);
-      color: var(--text-primary);
-      line-height: 1.65;
-      transition: border-color 0.15s;
-    }
+    textarea { width: 100%; min-height: 140px; resize: vertical; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; font-family: 'Inter', monospace; background: var(--surface); color: var(--text-primary); line-height: 1.7; transition: border-color 0.15s; }
     textarea::placeholder { color: var(--text-hint); }
     textarea:focus { outline: none; border-color: var(--accent); }
 
-    /* Error */
-    .error-msg {
-      font-size: 12px;
-      color: var(--danger);
-      margin-top: 6px;
-      display: none;
+    .md-hint { font-size: 11px; color: var(--text-hint); margin-top: 6px; }
+    .md-hint code { background: var(--bg); padding: 1px 4px; border-radius: 4px; font-size: 11px; }
+
+    .preview-toggle { display: flex; gap: 6px; margin-bottom: 10px; }
+    .tab-btn { padding: 5px 12px; border: 1px solid var(--border-strong); border-radius: 99px; background: transparent; color: var(--text-secondary); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    .tab-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+
+    /* 마크다운 공통 스타일 */
+    .md-body { font-size: 14px; line-height: 1.7; color: var(--text-primary); }
+    .md-body h1, .md-body h2, .md-body h3 { font-weight: 600; margin: 0.75em 0 0.3em; color: var(--text-primary); }
+    .md-body h1 { font-size: 16px; }
+    .md-body h2 { font-size: 15px; }
+    .md-body h3 { font-size: 14px; }
+    .md-body p { margin: 0.4em 0; }
+    .md-body ul, .md-body ol { margin: 0.4em 0 0.4em 1.4em; }
+    .md-body li { margin: 0.2em 0; }
+    .md-body strong { font-weight: 600; }
+    .md-body em { font-style: italic; }
+    .md-body code { background: var(--bg); padding: 1px 5px; border-radius: 4px; font-size: 13px; font-family: monospace; }
+    .md-body blockquote { border-left: 3px solid var(--accent); padding-left: 10px; color: var(--text-secondary); margin: 0.5em 0; }
+    .md-body hr { border: none; border-top: 1px solid var(--border); margin: 0.75em 0; }
+
+    /* 체크박스 공통 */
+    .md-body input[type="checkbox"] {
+      appearance: none; -webkit-appearance: none;
+      width: 15px; height: 15px;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-right: 6px; margin-top: -2px;
+      cursor: pointer; position: relative; flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+      display: inline-block;
     }
+    .md-body input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+    .md-body input[type="checkbox"]:checked::after {
+      content: ''; position: absolute;
+      left: 3px; top: 0px; width: 5px; height: 9px;
+      border: 2px solid #fff; border-top: none; border-left: none;
+      transform: rotate(45deg);
+    }
+    .md-body li:has(input[type="checkbox"]) { list-style: none; margin-left: -1.4em; display: flex; align-items: flex-start; padding: 2px 0; }
+    .md-body li.checked { color: var(--text-hint); text-decoration: line-through; }
+
+    /* md-preview (setup 탭) */
+    .md-preview { min-height: 80px; display: none; }
+    .md-preview.show { display: block; }
+
+    .error-msg { font-size: 12px; color: var(--danger); margin-top: 6px; display: none; }
     .error-msg.show { display: block; }
 
-    /* Start button */
-    .start-btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: var(--radius);
-      background: var(--accent);
-      color: #fff;
-      font-size: 15px;
-      font-family: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 4px;
-      transition: opacity 0.15s, transform 0.1s;
-      letter-spacing: 0.01em;
-    }
+    .start-btn { width: 100%; padding: 14px; border: none; border-radius: var(--radius); background: var(--accent); color: #fff; font-size: 15px; font-family: inherit; font-weight: 600; cursor: pointer; margin-top: 4px; transition: opacity 0.15s, transform 0.1s; letter-spacing: 0.01em; }
     .start-btn:hover { opacity: 0.88; }
     .start-btn:active { transform: scale(0.98); }
 
-    /* Timer screen */
-    .timer-topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-    .session-badge {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--accent);
-      background: var(--accent-bg);
-      padding: 4px 10px;
-      border-radius: 99px;
-    }
-    .end-btn {
-      padding: 7px 16px;
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-sm);
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 13px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
+    .timer-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .session-badge { font-size: 12px; font-weight: 500; color: var(--accent); background: var(--accent-bg); padding: 4px 10px; border-radius: 99px; }
+    .end-btn { padding: 7px 16px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font-size: 13px; font-family: inherit; cursor: pointer; transition: background 0.15s; }
     .end-btn:hover { background: var(--bg); }
 
-    /* Countdown card */
-    .countdown-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2rem 1.5rem;
-      text-align: center;
-      margin-bottom: 12px;
-    }
-    .countdown-sublabel {
-      font-size: 12px;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: var(--text-hint);
-      margin-bottom: 14px;
-    }
-    .countdown-digits {
-      font-size: 56px;
-      font-weight: 600;
-      color: var(--text-primary);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.03em;
-      line-height: 1;
-      transition: color 0.4s;
-    }
+    .countdown-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; margin-bottom: 12px; }
+    .countdown-sublabel { font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 14px; }
+    .countdown-digits { font-size: 56px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; letter-spacing: 0.03em; line-height: 1; transition: color 0.4s; }
     .countdown-digits.warn { color: var(--warning); }
     .countdown-digits.danger { color: var(--danger); }
-
-    .progress-wrap {
-      margin-top: 18px;
-      background: var(--bg);
-      border-radius: 99px;
-      height: 5px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      border-radius: 99px;
-      background: var(--accent);
-      transition: width 1s linear, background 0.4s;
-    }
+    .progress-wrap { margin-top: 18px; background: var(--bg); border-radius: 99px; height: 5px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 1s linear, background 0.4s; }
     .progress-fill.warn { background: var(--warning); }
     .progress-fill.danger { background: var(--danger); }
+    .deadline-note { margin-top: 10px; font-size: 13px; color: var(--text-secondary); }
 
-    .deadline-note {
-      margin-top: 10px;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
+    .plan-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 12px; }
 
-    /* Plan display */
-    .plan-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+    /* 마무리 체크리스트 카드 */
+    .checklist-card {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning);
       border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.5s ease, opacity 0.4s ease, padding 0.4s ease, margin 0.4s ease;
+      padding: 0 1.5rem;
+      margin-bottom: 0;
     }
-    .plan-body {
-      font-size: 14px;
-      color: var(--text-primary);
-      line-height: 1.7;
-      white-space: pre-wrap;
-    }
+    .checklist-card.show { max-height: 600px; opacity: 1; padding: 1.25rem 1.5rem; margin-bottom: 12px; }
+    .checklist-label { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--warning); margin-bottom: 10px; }
 
-    /* Done screen */
-    .done-wrap {
-      text-align: center;
-      padding-top: 1rem;
-    }
-    .done-icon-circle {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: var(--success-bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.25rem;
-      font-size: 28px;
-    }
-    .done-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-    .done-sub {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: 1.75rem;
-    }
+    /* 체크리스트 카드 안 체크박스는 warning 색 */
+    .checklist-card .md-body input[type="checkbox"] { border-color: var(--warning); }
+    .checklist-card .md-body input[type="checkbox"]:checked { background: var(--warning); border-color: var(--warning); }
 
-    /* History */
-    .history-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 16px;
-      text-align: left;
-    }
-    .history-item {
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-    }
+    .done-wrap { text-align: center; padding-top: 1rem; }
+    .done-icon-circle { width: 60px; height: 60px; border-radius: 50%; background: var(--success-bg); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: 28px; }
+    .done-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+    .done-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 1.75rem; }
+
+    .history-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 16px; text-align: left; }
+    .history-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
     .history-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .history-meta {
-      font-size: 11px;
-      color: var(--text-hint);
-      margin-bottom: 4px;
-    }
-    .history-plan-text {
-      font-size: 13px;
-      color: var(--text-primary);
-      white-space: pre-wrap;
-      line-height: 1.6;
-    }
+    .history-meta { font-size: 11px; color: var(--text-hint); margin-bottom: 6px; }
 
-    .restart-btn {
-      padding: 12px 32px;
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius);
-      background: transparent;
-      color: var(--text-primary);
-      font-size: 14px;
-      font-family: inherit;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
+    .restart-btn { padding: 12px 32px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: transparent; color: var(--text-primary); font-size: 14px; font-family: inherit; font-weight: 500; cursor: pointer; transition: background 0.15s; }
     .restart-btn:hover { background: var(--surface); }
   </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- Setup Page -->
+  <!-- ── Setup Page ── -->
   <div class="page active" id="page-setup">
     <div class="header">
       <p class="header-label">업무 세션 트래커</p>
@@ -392,14 +244,22 @@
 
     <div class="card">
       <p class="field-label">이번 업무 계획</p>
-      <textarea id="plan-input" placeholder="무엇을 할 건지, 어떤 결과물이 나와야 하는지 적어주세요"></textarea>
+      <div class="preview-toggle">
+        <button class="tab-btn active" id="tab-write" onclick="switchTab('write')">작성</button>
+        <button class="tab-btn" id="tab-preview" onclick="switchTab('preview')">미리보기</button>
+      </div>
+      <textarea id="plan-input"
+        placeholder="## 목표&#10;- [ ] 할 일 1&#10;- [ ] 할 일 2&#10;&#10;**완료 조건:** 결과물 설명"
+        oninput="syncPreview()"></textarea>
+      <div class="md-preview md-body" id="plan-preview"></div>
+      <p class="md-hint">마크다운 사용 가능: <code>## 제목</code> <code>- [ ] 체크박스</code> <code>**굵게**</code></p>
       <p class="error-msg" id="err-plan">계획을 입력해주세요</p>
     </div>
 
     <button class="start-btn" onclick="startSession()">업무 시작</button>
   </div>
 
-  <!-- Timer Page -->
+  <!-- ── Timer Page ── -->
   <div class="page" id="page-timer">
     <div class="timer-topbar">
       <span class="session-badge" id="session-badge">오전 세션</span>
@@ -417,23 +277,27 @@
 
     <div class="plan-card">
       <p class="field-label">이번 업무 계획</p>
-      <p class="plan-body" id="timer-plan"></p>
+      <div class="md-body" id="timer-plan"></div>
+    </div>
+
+    <!-- 마무리 체크리스트 (5분 전 자동 등장) -->
+    <div class="checklist-card" id="checklist-card">
+      <p class="checklist-label">⚠️ 마무리 전에 확인하세요</p>
+      <div class="md-body" id="checklist-body"></div>
     </div>
   </div>
 
-  <!-- Done Page -->
+  <!-- ── Done Page ── -->
   <div class="page" id="page-done">
     <div class="done-wrap">
       <div class="done-icon-circle">✓</div>
       <p class="done-title">업무 완료</p>
       <p class="done-sub" id="done-summary"></p>
     </div>
-
     <div class="history-card" id="history-card" style="display:none">
       <p class="field-label" style="margin-bottom:10px">오늘 업무 기록</p>
       <div id="history-list"></div>
     </div>
-
     <div style="text-align:center">
       <button class="restart-btn" onclick="restart()">새 업무 시작</button>
     </div>
@@ -442,15 +306,79 @@
 </div>
 
 <script>
+  /* ═══════════════════════════════════════════════
+     상태
+  ═══════════════════════════════════════════════ */
   let period = 'AM';
   let sessionStart = null;
-  let deadlineTs = null;
+  let deadlineTs   = null;
   let totalDuration = null;
   let timerInterval = null;
   let sessions = [];
+  let checklistShown = false;
 
+  marked.setOptions({ breaks: true, gfm: true });
+
+  /* ═══════════════════════════════════════════════
+     체크리스트 — <script id="checklist-source"> 에서 읽기
+     GitHub Pages 포함 어디서나 동작 (fetch 불필요)
+  ═══════════════════════════════════════════════ */
+  function renderChecklist() {
+    const src = document.getElementById('checklist-source').textContent.trim();
+    const el  = document.getElementById('checklist-body');
+    el.innerHTML = marked.parse(src);
+    activateCheckboxes(el);
+  }
+
+  /* ═══════════════════════════════════════════════
+     체크박스 활성화
+  ═══════════════════════════════════════════════ */
+  function activateCheckboxes(container) {
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.removeAttribute('disabled');
+      cb.addEventListener('change', () => {
+        const li = cb.closest('li');
+        if (li) li.classList.toggle('checked', cb.checked);
+      });
+      if (cb.checked) {
+        const li = cb.closest('li');
+        if (li) li.classList.add('checked');
+      }
+    });
+  }
+
+  /* ═══════════════════════════════════════════════
+     탭 전환 (작성 / 미리보기)
+  ═══════════════════════════════════════════════ */
+  function switchTab(tab) {
+    const ta = document.getElementById('plan-input');
+    const pv = document.getElementById('plan-preview');
+    document.getElementById('tab-write').classList.toggle('active', tab === 'write');
+    document.getElementById('tab-preview').classList.toggle('active', tab === 'preview');
+    if (tab === 'preview') {
+      syncPreview();
+      ta.style.display = 'none';
+      pv.classList.add('show');
+    } else {
+      ta.style.display = '';
+      pv.classList.remove('show');
+    }
+  }
+
+  function syncPreview() {
+    const raw = document.getElementById('plan-input').value;
+    const el  = document.getElementById('plan-preview');
+    el.innerHTML = raw
+      ? marked.parse(raw)
+      : '<span style="color:var(--text-hint)">미리볼 내용이 없어요</span>';
+    activateCheckboxes(el);
+  }
+
+  /* ═══════════════════════════════════════════════
+     시간 선택
+  ═══════════════════════════════════════════════ */
   const hourSel = document.getElementById('hour-sel');
-  const minSel = document.getElementById('min-sel');
+  const minSel  = document.getElementById('min-sel');
 
   function buildHours() {
     hourSel.innerHTML = '';
@@ -484,20 +412,26 @@
     document.getElementById(id).classList.add('active');
   }
 
+  /* ═══════════════════════════════════════════════
+     세션 시작
+  ═══════════════════════════════════════════════ */
   function startSession() {
-    const plan = document.getElementById('plan-input').value.trim();
+    const plan    = document.getElementById('plan-input').value.trim();
     const errTime = document.getElementById('err-time');
     const errPlan = document.getElementById('err-plan');
     let valid = true;
 
     const ts = getDeadlineTs();
-    if (ts <= Date.now()) { errTime.classList.add('show'); valid = false; } else { errTime.classList.remove('show'); }
-    if (!plan) { errPlan.classList.add('show'); valid = false; } else { errPlan.classList.remove('show'); }
+    if (ts <= Date.now()) { errTime.classList.add('show'); valid = false; }
+    else                  { errTime.classList.remove('show'); }
+    if (!plan)            { errPlan.classList.add('show'); valid = false; }
+    else                  { errPlan.classList.remove('show'); }
     if (!valid) return;
 
-    deadlineTs = ts;
-    sessionStart = Date.now();
+    deadlineTs    = ts;
+    sessionStart  = Date.now();
     totalDuration = deadlineTs - sessionStart;
+    checklistShown = false;
 
     const h = parseInt(hourSel.value);
     const m = parseInt(minSel.value);
@@ -506,7 +440,14 @@
 
     document.getElementById('session-badge').textContent = periodLabel + ' 세션';
     document.getElementById('deadline-note').textContent = '마감: ' + periodLabel + ' ' + h + '시 ' + mStr;
-    document.getElementById('timer-plan').textContent = plan;
+
+    const timerPlanEl = document.getElementById('timer-plan');
+    timerPlanEl.innerHTML = marked.parse(plan);
+    activateCheckboxes(timerPlanEl);
+
+    // 체크리스트 초기화
+    document.getElementById('checklist-card').classList.remove('show');
+    renderChecklist();
 
     sessions.push({
       label: periodLabel + ' 세션',
@@ -520,6 +461,9 @@
     tick();
   }
 
+  /* ═══════════════════════════════════════════════
+     타이머 tick
+  ═══════════════════════════════════════════════ */
   function tick() {
     const remaining = deadlineTs - Date.now();
     const cd = document.getElementById('countdown');
@@ -534,33 +478,36 @@
     }
 
     const totalSec = Math.floor(remaining / 1000);
-    const h = Math.floor(totalSec / 3600);
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = totalSec % 60;
-    cd.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    const hh = Math.floor(totalSec / 3600);
+    const mm = Math.floor((totalSec % 3600) / 60);
+    const ss = totalSec % 60;
+    cd.textContent = String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
 
     const pct = Math.max(0, Math.min(100, (remaining / totalDuration) * 100));
     pf.style.width = pct.toFixed(1) + '%';
 
-    cd.classList.remove('warn', 'danger');
-    pf.classList.remove('warn', 'danger');
-    if (remaining < 10 * 60 * 1000) {
-      cd.classList.add('danger'); pf.classList.add('danger');
-    } else if (remaining < 30 * 60 * 1000) {
-      cd.classList.add('warn'); pf.classList.add('warn');
+    cd.classList.remove('warn','danger');
+    pf.classList.remove('warn','danger');
+    if      (remaining < 10 * 60 * 1000) { cd.classList.add('danger'); pf.classList.add('danger'); }
+    else if (remaining < 30 * 60 * 1000) { cd.classList.add('warn');   pf.classList.add('warn');   }
+
+    // 5분 이하 → 마무리 체크리스트 슬라이드 인
+    if (!checklistShown && remaining <= 5 * 60 * 1000) {
+      checklistShown = true;
+      document.getElementById('checklist-card').classList.add('show');
     }
   }
 
-  function endSession() {
-    clearInterval(timerInterval);
-    showDone();
-  }
+  function endSession() { clearInterval(timerInterval); showDone(); }
 
+  /* ═══════════════════════════════════════════════
+     완료 화면
+  ═══════════════════════════════════════════════ */
   function showDone() {
     const elapsed = Math.floor((Date.now() - sessionStart) / 60000);
-    const h = Math.floor(elapsed / 60);
-    const m = elapsed % 60;
-    const timeStr = h > 0 ? h + '시간 ' + (m > 0 ? m + '분' : '') : m + '분';
+    const hh = Math.floor(elapsed / 60);
+    const mm = elapsed % 60;
+    const timeStr = hh > 0 ? hh + '시간 ' + (mm > 0 ? mm + '분' : '') : mm + '분';
     document.getElementById('done-summary').textContent = '총 ' + timeStr.trim() + ' 업무했어요';
 
     const list = document.getElementById('history-list');
@@ -568,23 +515,26 @@
     sessions.forEach(s => {
       const div = document.createElement('div');
       div.className = 'history-item';
-      div.innerHTML = '<p class="history-meta">' + s.label + ' · ' + s.startedAt + ' 시작 · ' + s.deadline + ' 마감</p>'
-        + '<p class="history-plan-text">' + esc(s.plan) + '</p>';
+      div.innerHTML =
+        '<p class="history-meta">' + s.label + ' · ' + s.startedAt + ' 시작 · ' + s.deadline + ' 마감</p>'
+        + '<div class="md-body" style="font-size:13px">' + marked.parse(s.plan) + '</div>';
       list.appendChild(div);
+      activateCheckboxes(div);
     });
 
     if (sessions.length > 0) document.getElementById('history-card').style.display = 'block';
     showPage('page-done');
   }
 
-  function esc(t) {
-    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
+  /* ═══════════════════════════════════════════════
+     재시작
+  ═══════════════════════════════════════════════ */
   function restart() {
     document.getElementById('plan-input').value = '';
+    document.getElementById('plan-preview').innerHTML = '';
     document.getElementById('err-time').classList.remove('show');
     document.getElementById('err-plan').classList.remove('show');
+    switchTab('write');
     sessionStart = null; deadlineTs = null; totalDuration = null;
     showPage('page-setup');
   }
