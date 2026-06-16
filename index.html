@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>업무 세션 트래커</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F7F6F3;
+      --surface: #FFFFFF;
+      --border: rgba(0,0,0,0.1);
+      --border-strong: rgba(0,0,0,0.18);
+      --text-primary: #1A1A1A;
+      --text-secondary: #6B6B6B;
+      --text-hint: #A0A0A0;
+      --accent: #2A52BE;
+      --accent-bg: #EEF2FF;
+      --warning: #C07A00;
+      --warning-bg: #FFF8E6;
+      --danger: #C0392B;
+      --danger-bg: #FEF0EE;
+      --success: #1A7A4A;
+      --success-bg: #EDFAF2;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141414;
+        --surface: #1E1E1E;
+        --border: rgba(255,255,255,0.08);
+        --border-strong: rgba(255,255,255,0.15);
+        --text-primary: #F0F0F0;
+        --text-secondary: #A0A0A0;
+        --text-hint: #5A5A5A;
+        --accent: #6B8EFF;
+        --accent-bg: #1A2240;
+        --warning: #E0A020;
+        --warning-bg: #2A2000;
+        --danger: #E05A4A;
+        --danger-bg: #2A1010;
+        --success: #3AB870;
+        --success-bg: #0A2018;
+      }
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Header */
+    .header {
+      margin-bottom: 2rem;
+    }
+    .header-label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-hint);
+      margin-bottom: 4px;
+    }
+    .header-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 12px;
+    }
+
+    .field-label {
+      font-size: 11px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-hint);
+      margin-bottom: 10px;
+    }
+
+    /* Period toggle */
+    .period-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 1.25rem;
+    }
+    .period-btn {
+      padding: 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .period-btn:hover { background: var(--bg); }
+    .period-btn.active {
+      background: var(--accent-bg);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Time select */
+    .time-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .time-row select {
+      padding: 9px 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      min-width: 70px;
+      text-align: center;
+    }
+    .time-row select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .time-unit { font-size: 14px; color: var(--text-secondary); }
+
+    /* Textarea */
+    textarea {
+      width: 100%;
+      min-height: 96px;
+      resize: vertical;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text-primary);
+      line-height: 1.65;
+      transition: border-color 0.15s;
+    }
+    textarea::placeholder { color: var(--text-hint); }
+    textarea:focus { outline: none; border-color: var(--accent); }
+
+    /* Error */
+    .error-msg {
+      font-size: 12px;
+      color: var(--danger);
+      margin-top: 6px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    /* Start button */
+    .start-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+    .start-btn:hover { opacity: 0.88; }
+    .start-btn:active { transform: scale(0.98); }
+
+    /* Timer screen */
+    .timer-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .session-badge {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-bg);
+      padding: 4px 10px;
+      border-radius: 99px;
+    }
+    .end-btn {
+      padding: 7px 16px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .end-btn:hover { background: var(--bg); }
+
+    /* Countdown card */
+    .countdown-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .countdown-sublabel {
+      font-size: 12px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-hint);
+      margin-bottom: 14px;
+    }
+    .countdown-digits {
+      font-size: 56px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.03em;
+      line-height: 1;
+      transition: color 0.4s;
+    }
+    .countdown-digits.warn { color: var(--warning); }
+    .countdown-digits.danger { color: var(--danger); }
+
+    .progress-wrap {
+      margin-top: 18px;
+      background: var(--bg);
+      border-radius: 99px;
+      height: 5px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--accent);
+      transition: width 1s linear, background 0.4s;
+    }
+    .progress-fill.warn { background: var(--warning); }
+    .progress-fill.danger { background: var(--danger); }
+
+    .deadline-note {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Plan display */
+    .plan-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+    }
+    .plan-body {
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    /* Done screen */
+    .done-wrap {
+      text-align: center;
+      padding-top: 1rem;
+    }
+    .done-icon-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--success-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 28px;
+    }
+    .done-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .done-sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 1.75rem;
+    }
+
+    /* History */
+    .history-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+    .history-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .history-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .history-meta {
+      font-size: 11px;
+      color: var(--text-hint);
+      margin-bottom: 4px;
+    }
+    .history-plan-text {
+      font-size: 13px;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+
+    .restart-btn {
+      padding: 12px 32px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .restart-btn:hover { background: var(--surface); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Setup Page -->
+  <div class="page active" id="page-setup">
+    <div class="header">
+      <p class="header-label">업무 세션 트래커</p>
+      <h1 class="header-title">오늘 뭘 할 건가요?</h1>
+    </div>
+
+    <div class="card">
+      <p class="field-label">시간대</p>
+      <div class="period-row">
+        <button class="period-btn active" id="btn-am" onclick="setPeriod('AM')">오전</button>
+        <button class="period-btn" id="btn-pm" onclick="setPeriod('PM')">오후</button>
+      </div>
+      <p class="field-label">언제까지 가능해요?</p>
+      <div class="time-row">
+        <select id="hour-sel"></select>
+        <span class="time-unit">시</span>
+        <select id="min-sel">
+          <option value="0">00</option>
+          <option value="15">15</option>
+          <option value="30">30</option>
+          <option value="45">45</option>
+        </select>
+        <span class="time-unit">분</span>
+      </div>
+      <p class="error-msg" id="err-time">현재 시간보다 이후 시간을 선택해주세요</p>
+    </div>
+
+    <div class="card">
+      <p class="field-label">이번 업무 계획</p>
+      <textarea id="plan-input" placeholder="무엇을 할 건지, 어떤 결과물이 나와야 하는지 적어주세요"></textarea>
+      <p class="error-msg" id="err-plan">계획을 입력해주세요</p>
+    </div>
+
+    <button class="start-btn" onclick="startSession()">업무 시작</button>
+  </div>
+
+  <!-- Timer Page -->
+  <div class="page" id="page-timer">
+    <div class="timer-topbar">
+      <span class="session-badge" id="session-badge">오전 세션</span>
+      <button class="end-btn" onclick="endSession()">업무 종료</button>
+    </div>
+
+    <div class="countdown-card">
+      <p class="countdown-sublabel">마감까지 남은 시간</p>
+      <div class="countdown-digits" id="countdown">00:00:00</div>
+      <div class="progress-wrap">
+        <div class="progress-fill" id="progress-fill" style="width:100%"></div>
+      </div>
+      <p class="deadline-note" id="deadline-note"></p>
+    </div>
+
+    <div class="plan-card">
+      <p class="field-label">이번 업무 계획</p>
+      <p class="plan-body" id="timer-plan"></p>
+    </div>
+  </div>
+
+  <!-- Done Page -->
+  <div class="page" id="page-done">
+    <div class="done-wrap">
+      <div class="done-icon-circle">✓</div>
+      <p class="done-title">업무 완료</p>
+      <p class="done-sub" id="done-summary"></p>
+    </div>
+
+    <div class="history-card" id="history-card" style="display:none">
+      <p class="field-label" style="margin-bottom:10px">오늘 업무 기록</p>
+      <div id="history-list"></div>
+    </div>
+
+    <div style="text-align:center">
+      <button class="restart-btn" onclick="restart()">새 업무 시작</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let period = 'AM';
+  let sessionStart = null;
+  let deadlineTs = null;
+  let totalDuration = null;
+  let timerInterval = null;
+  let sessions = [];
+
+  const hourSel = document.getElementById('hour-sel');
+  const minSel = document.getElementById('min-sel');
+
+  function buildHours() {
+    hourSel.innerHTML = '';
+    for (let h = 1; h <= 12; h++) {
+      const o = document.createElement('option');
+      o.value = h;
+      o.textContent = String(h).padStart(2, '0');
+      hourSel.appendChild(o);
+    }
+    hourSel.value = period === 'AM' ? 9 : 5;
+  }
+
+  function setPeriod(p) {
+    period = p;
+    document.getElementById('btn-am').classList.toggle('active', p === 'AM');
+    document.getElementById('btn-pm').classList.toggle('active', p === 'PM');
+    buildHours();
+  }
+
+  function getDeadlineTs() {
+    let h = parseInt(hourSel.value);
+    const m = parseInt(minSel.value);
+    if (period === 'PM' && h !== 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0).getTime();
+  }
+
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function startSession() {
+    const plan = document.getElementById('plan-input').value.trim();
+    const errTime = document.getElementById('err-time');
+    const errPlan = document.getElementById('err-plan');
+    let valid = true;
+
+    const ts = getDeadlineTs();
+    if (ts <= Date.now()) { errTime.classList.add('show'); valid = false; } else { errTime.classList.remove('show'); }
+    if (!plan) { errPlan.classList.add('show'); valid = false; } else { errPlan.classList.remove('show'); }
+    if (!valid) return;
+
+    deadlineTs = ts;
+    sessionStart = Date.now();
+    totalDuration = deadlineTs - sessionStart;
+
+    const h = parseInt(hourSel.value);
+    const m = parseInt(minSel.value);
+    const periodLabel = period === 'AM' ? '오전' : '오후';
+    const mStr = m > 0 ? m + '분' : '정각';
+
+    document.getElementById('session-badge').textContent = periodLabel + ' 세션';
+    document.getElementById('deadline-note').textContent = '마감: ' + periodLabel + ' ' + h + '시 ' + mStr;
+    document.getElementById('timer-plan').textContent = plan;
+
+    sessions.push({
+      label: periodLabel + ' 세션',
+      deadline: h + '시 ' + mStr,
+      plan,
+      startedAt: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+    });
+
+    showPage('page-timer');
+    timerInterval = setInterval(tick, 1000);
+    tick();
+  }
+
+  function tick() {
+    const remaining = deadlineTs - Date.now();
+    const cd = document.getElementById('countdown');
+    const pf = document.getElementById('progress-fill');
+
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      cd.textContent = '00:00:00';
+      pf.style.width = '0%';
+      showDone();
+      return;
+    }
+
+    const totalSec = Math.floor(remaining / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    cd.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+
+    const pct = Math.max(0, Math.min(100, (remaining / totalDuration) * 100));
+    pf.style.width = pct.toFixed(1) + '%';
+
+    cd.classList.remove('warn', 'danger');
+    pf.classList.remove('warn', 'danger');
+    if (remaining < 10 * 60 * 1000) {
+      cd.classList.add('danger'); pf.classList.add('danger');
+    } else if (remaining < 30 * 60 * 1000) {
+      cd.classList.add('warn'); pf.classList.add('warn');
+    }
+  }
+
+  function endSession() {
+    clearInterval(timerInterval);
+    showDone();
+  }
+
+  function showDone() {
+    const elapsed = Math.floor((Date.now() - sessionStart) / 60000);
+    const h = Math.floor(elapsed / 60);
+    const m = elapsed % 60;
+    const timeStr = h > 0 ? h + '시간 ' + (m > 0 ? m + '분' : '') : m + '분';
+    document.getElementById('done-summary').textContent = '총 ' + timeStr.trim() + ' 업무했어요';
+
+    const list = document.getElementById('history-list');
+    list.innerHTML = '';
+    sessions.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'history-item';
+      div.innerHTML = '<p class="history-meta">' + s.label + ' · ' + s.startedAt + ' 시작 · ' + s.deadline + ' 마감</p>'
+        + '<p class="history-plan-text">' + esc(s.plan) + '</p>';
+      list.appendChild(div);
+    });
+
+    if (sessions.length > 0) document.getElementById('history-card').style.display = 'block';
+    showPage('page-done');
+  }
+
+  function esc(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function restart() {
+    document.getElementById('plan-input').value = '';
+    document.getElementById('err-time').classList.remove('show');
+    document.getElementById('err-plan').classList.remove('show');
+    sessionStart = null; deadlineTs = null; totalDuration = null;
+    showPage('page-setup');
+  }
+
+  buildHours();
+</script>
+</body>
+</html>
