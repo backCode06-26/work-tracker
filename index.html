@@ -6,335 +6,550 @@
   <title>업무 세션 트래커</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
-
-  <!--
-  ╔══════════════════════════════════════════════════════╗
-  ║  마무리 체크리스트 수정 구역 (여기만 편집하면 됩니다)  ║
-  ╚══════════════════════════════════════════════════════╝
-  - 마크다운 형식으로 자유롭게 수정하세요
-  - ## 로 섹션 구분, - [ ] 로 체크박스 항목 추가
-  -->
-  <script id="checklist-source" type="text/plain">
-## 문서 품질
-- [ ] 문서의 형식을 잘 맞추었나요?
-- [ ] 다시 한번 형식을 잘 맞추었는지 확인하였나요?
-- [ ] 기존 문서의 데이터를 삭제하였나요?
-
-## 테스트
-- [ ] TC 진행 시 더 진행할 테스트 항목을 생각하였나요?
-- [ ] 테스트 진행 시 하라고 하는 것만 한 결과를 가져온다. (예: maxDeviceCount 수정 후 디바이스 로그인 데이터가 사라지지 않았는데 따로 로그인을 진행하여 되게 하면 안됨)
-  </script>
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #F7F6F3;
+      --bg: #F4F3F0;
       --surface: #FFFFFF;
-      --border: rgba(0,0,0,0.1);
-      --border-strong: rgba(0,0,0,0.18);
-      --text-primary: #1A1A1A;
-      --text-secondary: #6B6B6B;
-      --text-hint: #A0A0A0;
-      --accent: #2A52BE;
-      --accent-bg: #EEF2FF;
-      --warning: #C07A00;
-      --warning-bg: #FFF8E6;
+      --surface2: #F0EEE9;
+      --border: rgba(0,0,0,0.08);
+      --border-strong: rgba(0,0,0,0.15);
+      --text-primary: #1C1C1C;
+      --text-secondary: #636363;
+      --text-hint: #A8A8A8;
+      --accent: #2D5BE3;
+      --accent-bg: #EDF1FF;
+      --accent-light: #C7D4FF;
+      --warning: #B86800;
+      --warning-bg: #FFF4E0;
       --danger: #C0392B;
       --danger-bg: #FEF0EE;
       --success: #1A7A4A;
       --success-bg: #EDFAF2;
-      --radius: 12px;
+      --radius: 14px;
       --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #141414;
-        --surface: #1E1E1E;
-        --border: rgba(255,255,255,0.08);
-        --border-strong: rgba(255,255,255,0.15);
-        --text-primary: #F0F0F0;
-        --text-secondary: #A0A0A0;
-        --text-hint: #5A5A5A;
-        --accent: #6B8EFF;
-        --accent-bg: #1A2240;
-        --warning: #E0A020;
-        --warning-bg: #2A2000;
-        --danger: #E05A4A;
-        --danger-bg: #2A1010;
-        --success: #3AB870;
-        --success-bg: #0A2018;
+        --bg: #131313; --surface: #1E1E1E; --surface2: #252525;
+        --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.13);
+        --text-primary: #EFEFEF; --text-secondary: #9A9A9A; --text-hint: #555;
+        --accent: #6B8EFF; --accent-bg: #1A2240; --accent-light: #2A3A6A;
+        --warning: #D99A30; --warning-bg: #2A1E00;
+        --danger: #E05A4A; --danger-bg: #2A1010;
+        --success: #3AB870; --success-bg: #0A2018;
+        --shadow: 0 1px 3px rgba(0,0,0,0.2);
       }
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Inter', -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text-primary);
       min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 2rem 1rem;
     }
 
-    .container { width: 100%; max-width: 480px; }
-    .page { display: none; }
-    .page.active { display: block; }
+    /* ── 네비게이션 탭 ── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 1rem;
+      height: 52px;
+      gap: 4px;
+    }
+    .nav-title {
+      font-size: 13px; font-weight: 600;
+      color: var(--text-hint);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-right: 12px;
+      white-space: nowrap;
+    }
+    .nav-tab {
+      padding: 6px 14px;
+      border: none; border-radius: 99px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px; font-family: inherit; font-weight: 500;
+      cursor: pointer; transition: all .15s;
+      white-space: nowrap;
+    }
+    .nav-tab:hover { background: var(--surface2); color: var(--text-primary); }
+    .nav-tab.active { background: var(--accent-bg); color: var(--accent); }
 
-    .header { margin-bottom: 2rem; }
-    .header-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 4px; }
-    .header-title { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+    /* ── 페이지 컨테이너 ── */
+    .view { display: none; }
+    .view.active { display: block; }
 
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 12px; }
+    .page-wrap {
+      max-width: 520px; margin: 0 auto;
+      padding: 1.75rem 1rem 4rem;
+    }
 
-    .field-label { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 10px; }
+    /* ── 공통 카드 ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
 
+    .field-label {
+      font-size: 10px; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-hint);
+      margin-bottom: 10px; font-weight: 600;
+    }
+
+    /* ── 섹션 헤더 ── */
+    .section-header { margin-bottom: 1.25rem; }
+    .section-title { font-size: 20px; font-weight: 600; margin-bottom: 3px; }
+    .section-sub { font-size: 13px; color: var(--text-secondary); }
+
+    /* ── 시간대 토글 ── */
     .period-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
-    .period-btn { padding: 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font-size: 14px; font-family: inherit; font-weight: 500; cursor: pointer; transition: all 0.15s; }
-    .period-btn:hover { background: var(--bg); }
+    .period-btn {
+      padding: 10px; border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm); background: transparent;
+      color: var(--text-secondary); font-size: 14px;
+      font-family: inherit; font-weight: 500; cursor: pointer; transition: all .15s;
+    }
+    .period-btn:hover { background: var(--surface2); }
     .period-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
 
+    /* ── 시간 선택 ── */
     .time-row { display: flex; align-items: center; gap: 10px; }
-    .time-row select { padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-primary); font-size: 15px; font-family: inherit; font-weight: 500; cursor: pointer; appearance: none; -webkit-appearance: none; min-width: 70px; text-align: center; }
+    .time-row select {
+      padding: 9px 12px; border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm); background: var(--surface);
+      color: var(--text-primary); font-size: 15px;
+      font-family: inherit; font-weight: 500; cursor: pointer;
+      appearance: none; min-width: 70px; text-align: center;
+    }
     .time-row select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
     .time-unit { font-size: 14px; color: var(--text-secondary); }
 
-    textarea { width: 100%; min-height: 140px; resize: vertical; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; font-family: 'Inter', monospace; background: var(--surface); color: var(--text-primary); line-height: 1.7; transition: border-color 0.15s; }
+    /* ── textarea ── */
+    textarea {
+      width: 100%; resize: vertical;
+      border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+      padding: 10px 12px; font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--surface); color: var(--text-primary);
+      line-height: 1.7; transition: border-color .15s;
+    }
     textarea::placeholder { color: var(--text-hint); }
     textarea:focus { outline: none; border-color: var(--accent); }
+    textarea.plan-ta { min-height: 140px; }
+    textarea.rule-ta { min-height: 100px; }
+    textarea.editor-ta { min-height: 320px; font-size: 13px; }
 
-    .md-hint { font-size: 11px; color: var(--text-hint); margin-top: 6px; }
-    .md-hint code { background: var(--bg); padding: 1px 4px; border-radius: 4px; font-size: 11px; }
-
-    .preview-toggle { display: flex; gap: 6px; margin-bottom: 10px; }
-    .tab-btn { padding: 5px 12px; border: 1px solid var(--border-strong); border-radius: 99px; background: transparent; color: var(--text-secondary); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    /* ── 탭 (작성/미리보기) ── */
+    .tab-row { display: flex; gap: 6px; margin-bottom: 10px; }
+    .tab-btn {
+      padding: 5px 12px; border: 1px solid var(--border-strong);
+      border-radius: 99px; background: transparent;
+      color: var(--text-secondary); font-size: 12px;
+      font-family: inherit; cursor: pointer; transition: all .15s;
+    }
     .tab-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
 
-    /* 마크다운 공통 스타일 */
-    .md-body { font-size: 14px; line-height: 1.7; color: var(--text-primary); }
-    .md-body h1, .md-body h2, .md-body h3 { font-weight: 600; margin: 0.75em 0 0.3em; color: var(--text-primary); }
-    .md-body h1 { font-size: 16px; }
-    .md-body h2 { font-size: 15px; }
-    .md-body h3 { font-size: 14px; }
-    .md-body p { margin: 0.4em 0; }
-    .md-body ul, .md-body ol { margin: 0.4em 0 0.4em 1.4em; }
-    .md-body li { margin: 0.2em 0; }
+    /* ── 마크다운 공통 ── */
+    .md-body { font-size: 14px; line-height: 1.75; color: var(--text-primary); }
+    .md-body h1,.md-body h2,.md-body h3 { font-weight: 600; margin: .8em 0 .3em; }
+    .md-body h1{font-size:16px;} .md-body h2{font-size:15px;} .md-body h3{font-size:14px;}
+    .md-body p { margin: .4em 0; }
+    .md-body ul,.md-body ol { margin: .4em 0 .4em 1.4em; }
+    .md-body li { margin: .25em 0; }
     .md-body strong { font-weight: 600; }
     .md-body em { font-style: italic; }
-    .md-body code { background: var(--bg); padding: 1px 5px; border-radius: 4px; font-size: 13px; font-family: monospace; }
-    .md-body blockquote { border-left: 3px solid var(--accent); padding-left: 10px; color: var(--text-secondary); margin: 0.5em 0; }
-    .md-body hr { border: none; border-top: 1px solid var(--border); margin: 0.75em 0; }
-
-    /* 체크박스 공통 */
+    .md-body hr { border: none; border-top: 1px solid var(--border); margin: .8em 0; }
+    .md-body code { font-family: 'JetBrains Mono', monospace; background: var(--surface2); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
     .md-body input[type="checkbox"] {
       appearance: none; -webkit-appearance: none;
-      width: 15px; height: 15px;
-      border: 1.5px solid var(--border-strong);
-      border-radius: 4px;
-      vertical-align: middle;
-      margin-right: 6px; margin-top: -2px;
+      width: 15px; height: 15px; border: 1.5px solid var(--border-strong);
+      border-radius: 4px; vertical-align: middle; margin-right: 6px; margin-top: -2px;
       cursor: pointer; position: relative; flex-shrink: 0;
-      transition: background 0.15s, border-color 0.15s;
-      display: inline-block;
+      transition: background .15s; display: inline-block;
     }
     .md-body input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
     .md-body input[type="checkbox"]:checked::after {
-      content: ''; position: absolute;
-      left: 3px; top: 0px; width: 5px; height: 9px;
-      border: 2px solid #fff; border-top: none; border-left: none;
-      transform: rotate(45deg);
+      content: ''; position: absolute; left: 3px; top: 0;
+      width: 5px; height: 9px; border: 2px solid #fff;
+      border-top: none; border-left: none; transform: rotate(45deg);
     }
     .md-body li:has(input[type="checkbox"]) { list-style: none; margin-left: -1.4em; display: flex; align-items: flex-start; padding: 2px 0; }
     .md-body li.checked { color: var(--text-hint); text-decoration: line-through; }
 
-    /* md-preview (setup 탭) */
-    .md-preview { min-height: 80px; display: none; }
+    .md-preview { display: none; }
     .md-preview.show { display: block; }
 
+    /* ── 에러 ── */
     .error-msg { font-size: 12px; color: var(--danger); margin-top: 6px; display: none; }
     .error-msg.show { display: block; }
 
-    .start-btn { width: 100%; padding: 14px; border: none; border-radius: var(--radius); background: var(--accent); color: #fff; font-size: 15px; font-family: inherit; font-weight: 600; cursor: pointer; margin-top: 4px; transition: opacity 0.15s, transform 0.1s; letter-spacing: 0.01em; }
-    .start-btn:hover { opacity: 0.88; }
-    .start-btn:active { transform: scale(0.98); }
+    /* ── 버튼 공통 ── */
+    .btn-primary {
+      width: 100%; padding: 13px; border: none;
+      border-radius: var(--radius); background: var(--accent);
+      color: #fff; font-size: 14px; font-family: inherit;
+      font-weight: 600; cursor: pointer; transition: opacity .15s, transform .1s;
+    }
+    .btn-primary:hover { opacity: .88; }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-primary:disabled { opacity: .45; cursor: not-allowed; }
 
-    .timer-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-    .session-badge { font-size: 12px; font-weight: 500; color: var(--accent); background: var(--accent-bg); padding: 4px 10px; border-radius: 99px; }
-    .end-btn { padding: 7px 16px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font-size: 13px; font-family: inherit; cursor: pointer; transition: background 0.15s; }
-    .end-btn:hover { background: var(--bg); }
+    .btn-ghost {
+      padding: 10px 20px; border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm); background: transparent;
+      color: var(--text-secondary); font-size: 13px;
+      font-family: inherit; font-weight: 500; cursor: pointer; transition: background .15s;
+    }
+    .btn-ghost:hover { background: var(--surface2); }
 
-    .countdown-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; margin-bottom: 12px; }
-    .countdown-sublabel { font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 14px; }
-    .countdown-digits { font-size: 56px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; letter-spacing: 0.03em; line-height: 1; transition: color 0.4s; }
-    .countdown-digits.warn { color: var(--warning); }
-    .countdown-digits.danger { color: var(--danger); }
-    .progress-wrap { margin-top: 18px; background: var(--bg); border-radius: 99px; height: 5px; overflow: hidden; }
-    .progress-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 1s linear, background 0.4s; }
-    .progress-fill.warn { background: var(--warning); }
+    .btn-outline {
+      padding: 8px 16px; border: 1px solid var(--accent);
+      border-radius: var(--radius-sm); background: transparent;
+      color: var(--accent); font-size: 13px;
+      font-family: inherit; font-weight: 500; cursor: pointer; transition: background .15s;
+    }
+    .btn-outline:hover { background: var(--accent-bg); }
+
+    /* ── 타이머 화면 ── */
+    .timer-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .session-badge {
+      font-size: 12px; font-weight: 600; color: var(--accent);
+      background: var(--accent-bg); padding: 5px 12px; border-radius: 99px;
+    }
+
+    .countdown-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem 1.5rem;
+      text-align: center; margin-bottom: 12px; box-shadow: var(--shadow);
+    }
+    .countdown-sublabel {
+      font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--text-hint); margin-bottom: 14px;
+    }
+    .countdown-digits {
+      font-size: 58px; font-weight: 600; color: var(--text-primary);
+      font-variant-numeric: tabular-nums; letter-spacing: .03em;
+      line-height: 1; transition: color .4s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .countdown-digits.warn  { color: var(--warning); }
+    .countdown-digits.danger{ color: var(--danger); }
+
+    .progress-wrap { margin-top: 18px; background: var(--surface2); border-radius: 99px; height: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 1s linear, background .4s; }
+    .progress-fill.warn   { background: var(--warning); }
     .progress-fill.danger { background: var(--danger); }
     .deadline-note { margin-top: 10px; font-size: 13px; color: var(--text-secondary); }
 
-    .plan-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 12px; }
-
-    /* 마무리 체크리스트 카드 */
+    /* ── 체크리스트 카드 (30분 전 슬라이드 인) ── */
     .checklist-card {
-      background: var(--warning-bg);
-      border: 1px solid var(--warning);
+      background: var(--warning-bg); border: 1px solid var(--warning);
       border-radius: var(--radius);
-      overflow: hidden;
-      max-height: 0;
-      opacity: 0;
-      transition: max-height 0.5s ease, opacity 0.4s ease, padding 0.4s ease, margin 0.4s ease;
-      padding: 0 1.5rem;
-      margin-bottom: 0;
+      overflow: hidden; max-height: 0; opacity: 0;
+      padding: 0 1.5rem; margin-bottom: 0;
+      transition: max-height .5s ease, opacity .4s ease, padding .4s ease, margin .4s ease;
     }
-    .checklist-card.show { max-height: 600px; opacity: 1; padding: 1.25rem 1.5rem; margin-bottom: 12px; }
-    .checklist-label { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--warning); margin-bottom: 10px; }
-
-    /* 체크리스트 카드 안 체크박스는 warning 색 */
+    .checklist-card.show { max-height: 800px; opacity: 1; padding: 1.25rem 1.5rem; margin-bottom: 12px; }
+    .checklist-label { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--warning); margin-bottom: 10px; font-weight: 600; }
     .checklist-card .md-body input[type="checkbox"] { border-color: var(--warning); }
     .checklist-card .md-body input[type="checkbox"]:checked { background: var(--warning); border-color: var(--warning); }
 
-    .done-wrap { text-align: center; padding-top: 1rem; }
-    .done-icon-circle { width: 60px; height: 60px; border-radius: 50%; background: var(--success-bg); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: 28px; }
-    .done-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
-    .done-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 1.75rem; }
+    /* ── 규칙 입력 화면 ── */
+    .rule-screen { text-align: center; padding: .5rem 0 1rem; }
+    .rule-icon { font-size: 36px; margin-bottom: .75rem; }
+    .rule-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+    .rule-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+    .rule-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .rule-status { font-size: 12px; color: var(--text-hint); margin-top: 8px; min-height: 18px; }
+    .rule-status.ok  { color: var(--success); }
+    .rule-status.err { color: var(--danger); }
 
-    .history-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 16px; text-align: left; }
+    /* ── 완료 화면 ── */
+    .done-icon { width: 60px; height: 60px; border-radius: 50%; background: var(--success-bg); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: 28px; }
+    .done-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; text-align: center; }
+    .done-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 1.75rem; text-align: center; }
     .history-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
     .history-item:last-child { border-bottom: none; padding-bottom: 0; }
     .history-meta { font-size: 11px; color: var(--text-hint); margin-bottom: 6px; }
 
-    .restart-btn { padding: 12px 32px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: transparent; color: var(--text-primary); font-size: 14px; font-family: inherit; font-weight: 500; cursor: pointer; transition: background 0.15s; }
-    .restart-btn:hover { background: var(--surface); }
+    /* ── 편집기 뷰 ── */
+    .editor-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media(max-width: 640px) { .editor-layout { grid-template-columns: 1fr; } }
+    .editor-pane { display: flex; flex-direction: column; gap: 8px; }
+    .pane-label { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--text-hint); font-weight: 600; }
+
+    /* ── 규칙 목록 뷰 ── */
+    .rules-list { display: flex; flex-direction: column; gap: 10px; }
+    .rule-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .rule-date { font-size: 11px; color: var(--text-hint); margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; }
+    .rule-text { font-size: 14px; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; }
+    .rules-empty { text-align: center; color: var(--text-hint); font-size: 14px; padding: 2rem 0; }
+
+    /* ── 툴바 ── */
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+    .toolbar-right { margin-left: auto; display: flex; gap: 8px; }
+
+    /* ── 파일 업로드 ── */
+    .upload-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-sm); background: transparent;
+      color: var(--text-secondary); font-size: 13px;
+      font-family: inherit; cursor: pointer; transition: all .15s;
+    }
+    .upload-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+    input[type="file"] { display: none; }
+
+    /* ── 토스트 ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text-primary); color: var(--bg);
+      padding: 10px 20px; border-radius: 99px;
+      font-size: 13px; font-weight: 500;
+      transition: transform .3s ease; z-index: 999; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.ok  { background: var(--success); color: #fff; }
+    .toast.err { background: var(--danger);  color: #fff; }
+
+    /* md hint */
+    .md-hint { font-size: 11px; color: var(--text-hint); margin-top: 6px; }
+    .md-hint code { background: var(--surface2); padding: 1px 4px; border-radius: 3px; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+
+    .divider { height: 1px; background: var(--border); margin: 4px 0 12px; }
   </style>
 </head>
 <body>
-<div class="container">
 
-  <!-- ── Setup Page ── -->
-  <div class="page active" id="page-setup">
-    <div class="header">
-      <p class="header-label">업무 세션 트래커</p>
-      <h1 class="header-title">오늘 뭘 할 건가요?</h1>
+<!-- ── 네비게이션 ── -->
+<nav class="nav">
+  <span class="nav-title">Tracker</span>
+  <button class="nav-tab active" onclick="switchView('tracker')">⏱ 타이머</button>
+  <button class="nav-tab" onclick="switchView('editor')">✏️ 체크리스트</button>
+  <button class="nav-tab" onclick="switchView('rules')">📚 규칙 목록</button>
+</nav>
+
+<!-- ════════════════════════════════════
+     뷰 1: 트래커
+════════════════════════════════════ -->
+<div class="view active" id="view-tracker">
+  <div class="page-wrap">
+
+    <!-- 설정 화면 -->
+    <div id="page-setup">
+      <div class="section-header">
+        <div class="section-title">오늘 뭘 할 건가요?</div>
+        <div class="section-sub">계획을 먼저 세우고 시작해요</div>
+      </div>
+
+      <div class="card">
+        <p class="field-label">시간대</p>
+        <div class="period-row">
+          <button class="period-btn active" id="btn-am" onclick="setPeriod('AM')">오전</button>
+          <button class="period-btn" id="btn-pm" onclick="setPeriod('PM')">오후</button>
+        </div>
+        <p class="field-label">언제까지 가능해요?</p>
+        <div class="time-row">
+          <select id="hour-sel"></select><span class="time-unit">시</span>
+          <select id="min-sel">
+            <option value="0">00</option><option value="15">15</option>
+            <option value="30">30</option><option value="45">45</option>
+          </select><span class="time-unit">분</span>
+        </div>
+        <p class="error-msg" id="err-time">현재 시간보다 이후 시간을 선택해주세요</p>
+      </div>
+
+      <div class="card">
+        <p class="field-label">이번 업무 계획</p>
+        <div class="tab-row">
+          <button class="tab-btn active" id="tab-write" onclick="switchPlanTab('write')">작성</button>
+          <button class="tab-btn" id="tab-preview" onclick="switchPlanTab('preview')">미리보기</button>
+        </div>
+        <textarea class="plan-ta" id="plan-input"
+          placeholder="## 목표&#10;- [ ] 할 일 1&#10;- [ ] 할 일 2&#10;&#10;**완료 조건:** 결과물 설명"
+          oninput="syncPlanPreview()"></textarea>
+        <div class="md-preview md-body" id="plan-preview"></div>
+        <p class="md-hint">마크다운: <code>## 제목</code> <code>- [ ] 체크박스</code> <code>**굵게**</code></p>
+        <p class="error-msg" id="err-plan">계획을 입력해주세요</p>
+      </div>
+
+      <button class="btn-primary" onclick="startSession()">업무 시작</button>
     </div>
 
-    <div class="card">
-      <p class="field-label">시간대</p>
-      <div class="period-row">
-        <button class="period-btn active" id="btn-am" onclick="setPeriod('AM')">오전</button>
-        <button class="period-btn" id="btn-pm" onclick="setPeriod('PM')">오후</button>
+    <!-- 타이머 화면 -->
+    <div id="page-timer" style="display:none">
+      <div class="timer-topbar">
+        <span class="session-badge" id="session-badge">오전 세션</span>
+        <button class="btn-ghost" onclick="endSession()">업무 종료</button>
       </div>
-      <p class="field-label">언제까지 가능해요?</p>
-      <div class="time-row">
-        <select id="hour-sel"></select>
-        <span class="time-unit">시</span>
-        <select id="min-sel">
-          <option value="0">00</option>
-          <option value="15">15</option>
-          <option value="30">30</option>
-          <option value="45">45</option>
-        </select>
-        <span class="time-unit">분</span>
+
+      <div class="countdown-card">
+        <p class="countdown-sublabel">마감까지 남은 시간</p>
+        <div class="countdown-digits" id="countdown">00:00:00</div>
+        <div class="progress-wrap"><div class="progress-fill" id="progress-fill" style="width:100%"></div></div>
+        <p class="deadline-note" id="deadline-note"></p>
       </div>
-      <p class="error-msg" id="err-time">현재 시간보다 이후 시간을 선택해주세요</p>
+
+      <div class="card">
+        <p class="field-label">이번 업무 계획</p>
+        <div class="md-body" id="timer-plan"></div>
+      </div>
+
+      <!-- 30분 전 체크리스트 -->
+      <div class="checklist-card" id="checklist-card">
+        <p class="checklist-label">⚠️ 마무리 전에 확인하세요</p>
+        <div class="md-body" id="checklist-body"></div>
+      </div>
     </div>
 
-    <div class="card">
-      <p class="field-label">이번 업무 계획</p>
-      <div class="preview-toggle">
-        <button class="tab-btn active" id="tab-write" onclick="switchTab('write')">작성</button>
-        <button class="tab-btn" id="tab-preview" onclick="switchTab('preview')">미리보기</button>
+    <!-- 규칙 입력 화면 -->
+    <div id="page-rule" style="display:none">
+      <div class="rule-screen">
+        <div class="rule-icon">📝</div>
+        <p class="rule-title">오늘 배운 규칙이 있나요?</p>
+        <p class="rule-sub">업무 중 발견한 규칙이나 배운 점을 기록하면<br>규칙 목록에 자동으로 쌓여요.</p>
       </div>
-      <textarea id="plan-input"
-        placeholder="## 목표&#10;- [ ] 할 일 1&#10;- [ ] 할 일 2&#10;&#10;**완료 조건:** 결과물 설명"
-        oninput="syncPreview()"></textarea>
-      <div class="md-preview md-body" id="plan-preview"></div>
-      <p class="md-hint">마크다운 사용 가능: <code>## 제목</code> <code>- [ ] 체크박스</code> <code>**굵게**</code></p>
-      <p class="error-msg" id="err-plan">계획을 입력해주세요</p>
+      <div class="card">
+        <p class="field-label">새로운 규칙</p>
+        <textarea class="rule-ta" id="rule-input"
+          placeholder="예) TC 진행 시 요청된 항목만 테스트하고, 임의로 추가 액션을 취하지 않는다.&#10;예) 문서 작성 전 기존 포맷을 반드시 확인한다."></textarea>
+        <div class="rule-actions">
+          <button class="btn-primary" id="rule-save-btn" onclick="saveRule()">저장하고 완료</button>
+          <button class="btn-ghost" onclick="showDone()">스킵</button>
+        </div>
+        <p class="rule-status" id="rule-status"></p>
+      </div>
     </div>
 
-    <button class="start-btn" onclick="startSession()">업무 시작</button>
+    <!-- 완료 화면 -->
+    <div id="page-done" style="display:none">
+      <div class="card" style="text-align:center; padding: 2rem 1.5rem;">
+        <div class="done-icon">✓</div>
+        <p class="done-title">업무 완료</p>
+        <p class="done-sub" id="done-summary"></p>
+        <button class="btn-primary" onclick="restart()">새 업무 시작</button>
+      </div>
+      <div class="card" id="history-card" style="display:none">
+        <p class="field-label" style="margin-bottom:10px">오늘 업무 기록</p>
+        <div id="history-list"></div>
+      </div>
+    </div>
+
   </div>
-
-  <!-- ── Timer Page ── -->
-  <div class="page" id="page-timer">
-    <div class="timer-topbar">
-      <span class="session-badge" id="session-badge">오전 세션</span>
-      <button class="end-btn" onclick="endSession()">업무 종료</button>
-    </div>
-
-    <div class="countdown-card">
-      <p class="countdown-sublabel">마감까지 남은 시간</p>
-      <div class="countdown-digits" id="countdown">00:00:00</div>
-      <div class="progress-wrap">
-        <div class="progress-fill" id="progress-fill" style="width:100%"></div>
-      </div>
-      <p class="deadline-note" id="deadline-note"></p>
-    </div>
-
-    <div class="plan-card">
-      <p class="field-label">이번 업무 계획</p>
-      <div class="md-body" id="timer-plan"></div>
-    </div>
-
-    <!-- 마무리 체크리스트 (5분 전 자동 등장) -->
-    <div class="checklist-card" id="checklist-card">
-      <p class="checklist-label">⚠️ 마무리 전에 확인하세요</p>
-      <div class="md-body" id="checklist-body"></div>
-    </div>
-  </div>
-
-  <!-- ── Done Page ── -->
-  <div class="page" id="page-done">
-    <div class="done-wrap">
-      <div class="done-icon-circle">✓</div>
-      <p class="done-title">업무 완료</p>
-      <p class="done-sub" id="done-summary"></p>
-    </div>
-    <div class="history-card" id="history-card" style="display:none">
-      <p class="field-label" style="margin-bottom:10px">오늘 업무 기록</p>
-      <div id="history-list"></div>
-    </div>
-    <div style="text-align:center">
-      <button class="restart-btn" onclick="restart()">새 업무 시작</button>
-    </div>
-  </div>
-
 </div>
 
-<script>
-  /* ═══════════════════════════════════════════════
-     상태
-  ═══════════════════════════════════════════════ */
-  let period = 'AM';
-  let sessionStart = null;
-  let deadlineTs   = null;
-  let totalDuration = null;
-  let timerInterval = null;
-  let sessions = [];
-  let checklistShown = false;
+<!-- ════════════════════════════════════
+     뷰 2: 체크리스트 편집기
+════════════════════════════════════ -->
+<div class="view" id="view-editor">
+  <div class="page-wrap" style="max-width: 900px;">
+    <div class="section-header">
+      <div class="section-title">체크리스트 편집</div>
+      <div class="section-sub">checklist.md 파일을 불러오거나 직접 편집하세요. 저장하면 브라우저에 보관됩니다.</div>
+    </div>
 
+    <div class="toolbar">
+      <label class="upload-btn" for="checklist-file">
+        📂 .md 파일 불러오기
+        <input type="file" id="checklist-file" accept=".md,.txt" onchange="loadChecklistFile(event)">
+      </label>
+      <button class="btn-outline" onclick="downloadChecklist()">⬇ .md 내보내기</button>
+      <div class="toolbar-right">
+        <button class="btn-primary" style="width:auto; padding: 8px 20px;" onclick="saveChecklist()">저장</button>
+      </div>
+    </div>
+
+    <div class="editor-layout">
+      <div class="editor-pane">
+        <p class="pane-label">마크다운 편집</p>
+        <textarea class="editor-ta" id="checklist-editor"
+          spellcheck="false"
+          placeholder="## 문서 품질&#10;- [ ] 문서의 형식을 잘 맞추었나요?&#10;- [ ] 기존 문서의 데이터를 삭제하였나요?&#10;&#10;## 테스트&#10;- [ ] TC 진행 시 더 진행할 테스트 항목을 생각하였나요?"
+          oninput="syncChecklistPreview()"></textarea>
+        <p class="md-hint"><code>## 섹션</code> <code>- [ ] 항목</code> 형식으로 작성하세요</p>
+      </div>
+      <div class="editor-pane">
+        <p class="pane-label">미리보기</p>
+        <div class="card" style="min-height: 320px;">
+          <div class="md-body" id="checklist-preview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     뷰 3: 규칙 목록
+════════════════════════════════════ -->
+<div class="view" id="view-rules">
+  <div class="page-wrap">
+    <div class="section-header">
+      <div class="section-title">업무 규칙 목록</div>
+      <div class="section-sub">업무 종료 후 입력한 규칙이 시간순으로 쌓여요.</div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn-outline" onclick="downloadRules()">⬇ rules.md 내보내기</button>
+      <div class="toolbar-right">
+        <button class="btn-ghost" style="font-size:12px; color:var(--danger); border-color:var(--danger);" onclick="clearRules()">전체 삭제</button>
+      </div>
+    </div>
+
+    <div class="rules-list" id="rules-list">
+      <p class="rules-empty">아직 저장된 규칙이 없어요.<br>업무 종료 후 배운 규칙을 입력해보세요.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
   marked.setOptions({ breaks: true, gfm: true });
 
-  /* ═══════════════════════════════════════════════
-     체크리스트 — <script id="checklist-source"> 에서 읽기
-     GitHub Pages 포함 어디서나 동작 (fetch 불필요)
-  ═══════════════════════════════════════════════ */
-  function renderChecklist() {
-    const src = document.getElementById('checklist-source').textContent.trim();
-    const el  = document.getElementById('checklist-body');
-    el.innerHTML = marked.parse(src);
-    activateCheckboxes(el);
+  /* ════════════════════
+     localStorage 키
+  ════════════════════ */
+  const LS_CHECKLIST = 'wt_checklist_v1';
+  const LS_RULES     = 'wt_rules_v1';
+
+  /* ════════════════════
+     뷰 전환
+  ════════════════════ */
+  function switchView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+    const idx = { tracker: 0, editor: 1, rules: 2 };
+    document.querySelectorAll('.nav-tab')[idx[name]].classList.add('active');
+    if (name === 'editor') initEditor();
+    if (name === 'rules')  renderRulesList();
   }
 
-  /* ═══════════════════════════════════════════════
+  /* ════════════════════
      체크박스 활성화
-  ═══════════════════════════════════════════════ */
+  ════════════════════ */
   function activateCheckboxes(container) {
     container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
       cb.removeAttribute('disabled');
@@ -342,43 +557,17 @@
         const li = cb.closest('li');
         if (li) li.classList.toggle('checked', cb.checked);
       });
-      if (cb.checked) {
-        const li = cb.closest('li');
-        if (li) li.classList.add('checked');
-      }
+      if (cb.checked) { const li = cb.closest('li'); if (li) li.classList.add('checked'); }
     });
   }
 
-  /* ═══════════════════════════════════════════════
-     탭 전환 (작성 / 미리보기)
-  ═══════════════════════════════════════════════ */
-  function switchTab(tab) {
-    const ta = document.getElementById('plan-input');
-    const pv = document.getElementById('plan-preview');
-    document.getElementById('tab-write').classList.toggle('active', tab === 'write');
-    document.getElementById('tab-preview').classList.toggle('active', tab === 'preview');
-    if (tab === 'preview') {
-      syncPreview();
-      ta.style.display = 'none';
-      pv.classList.add('show');
-    } else {
-      ta.style.display = '';
-      pv.classList.remove('show');
-    }
-  }
+  /* ════════════════════
+     타이머 상태
+  ════════════════════ */
+  let period = 'AM', sessionStart = null, deadlineTs = null;
+  let totalDuration = null, timerInterval = null;
+  let sessions = [], checklistShown = false, elapsedMin = 0;
 
-  function syncPreview() {
-    const raw = document.getElementById('plan-input').value;
-    const el  = document.getElementById('plan-preview');
-    el.innerHTML = raw
-      ? marked.parse(raw)
-      : '<span style="color:var(--text-hint)">미리볼 내용이 없어요</span>';
-    activateCheckboxes(el);
-  }
-
-  /* ═══════════════════════════════════════════════
-     시간 선택
-  ═══════════════════════════════════════════════ */
   const hourSel = document.getElementById('hour-sel');
   const minSel  = document.getElementById('min-sel');
 
@@ -386,8 +575,7 @@
     hourSel.innerHTML = '';
     for (let h = 1; h <= 12; h++) {
       const o = document.createElement('option');
-      o.value = h;
-      o.textContent = String(h).padStart(2, '0');
+      o.value = h; o.textContent = String(h).padStart(2, '0');
       hourSel.appendChild(o);
     }
     hourSel.value = period === 'AM' ? 9 : 5;
@@ -401,22 +589,46 @@
   }
 
   function getDeadlineTs() {
-    let h = parseInt(hourSel.value);
-    const m = parseInt(minSel.value);
+    let h = parseInt(hourSel.value), m = parseInt(minSel.value);
     if (period === 'PM' && h !== 12) h += 12;
     if (period === 'AM' && h === 12) h = 0;
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0).getTime();
   }
 
-  function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+  function showTrackerPage(id) {
+    ['page-setup','page-timer','page-rule','page-done'].forEach(p => {
+      document.getElementById(p).style.display = p === id ? '' : 'none';
+    });
   }
 
-  /* ═══════════════════════════════════════════════
-     세션 시작
-  ═══════════════════════════════════════════════ */
+  /* ── 계획 탭 ── */
+  function switchPlanTab(tab) {
+    const ta = document.getElementById('plan-input');
+    const pv = document.getElementById('plan-preview');
+    document.getElementById('tab-write').classList.toggle('active', tab === 'write');
+    document.getElementById('tab-preview').classList.toggle('active', tab === 'preview');
+    if (tab === 'preview') { syncPlanPreview(); ta.style.display = 'none'; pv.classList.add('show'); }
+    else { ta.style.display = ''; pv.classList.remove('show'); }
+  }
+
+  function syncPlanPreview() {
+    const raw = document.getElementById('plan-input').value;
+    const el  = document.getElementById('plan-preview');
+    el.innerHTML = raw ? marked.parse(raw) : '<span style="color:var(--text-hint)">미리볼 내용이 없어요</span>';
+    activateCheckboxes(el);
+  }
+
+  /* ── 체크리스트 로드 ── */
+  function renderChecklist() {
+    const src = localStorage.getItem(LS_CHECKLIST) ||
+      `## 문서 품질\n- [ ] 문서의 형식을 잘 맞추었나요?\n- [ ] 다시 한번 형식을 잘 맞추었는지 확인하였나요?\n- [ ] 기존 문서의 데이터를 삭제하였나요?\n\n## 테스트\n- [ ] TC 진행 시 더 진행할 테스트 항목을 생각하였나요?\n- [ ] 테스트 진행 시 하라고 하는 것만 한 결과를 가져온다.`;
+    const el = document.getElementById('checklist-body');
+    el.innerHTML = marked.parse(src);
+    activateCheckboxes(el);
+  }
+
+  /* ── 세션 시작 ── */
   function startSession() {
     const plan    = document.getElementById('plan-input').value.trim();
     const errTime = document.getElementById('err-time');
@@ -424,48 +636,38 @@
     let valid = true;
 
     const ts = getDeadlineTs();
-    if (ts <= Date.now()) { errTime.classList.add('show'); valid = false; }
-    else                  { errTime.classList.remove('show'); }
-    if (!plan)            { errPlan.classList.add('show'); valid = false; }
-    else                  { errPlan.classList.remove('show'); }
+    if (ts <= Date.now()) { errTime.classList.add('show'); valid = false; } else errTime.classList.remove('show');
+    if (!plan)            { errPlan.classList.add('show'); valid = false; } else errPlan.classList.remove('show');
     if (!valid) return;
 
-    deadlineTs    = ts;
-    sessionStart  = Date.now();
-    totalDuration = deadlineTs - sessionStart;
-    checklistShown = false;
+    deadlineTs = ts; sessionStart = Date.now();
+    totalDuration = ts - sessionStart; checklistShown = false;
 
-    const h = parseInt(hourSel.value);
-    const m = parseInt(minSel.value);
-    const periodLabel = period === 'AM' ? '오전' : '오후';
+    const h = parseInt(hourSel.value), m = parseInt(minSel.value);
+    const pl = period === 'AM' ? '오전' : '오후';
     const mStr = m > 0 ? m + '분' : '정각';
 
-    document.getElementById('session-badge').textContent = periodLabel + ' 세션';
-    document.getElementById('deadline-note').textContent = '마감: ' + periodLabel + ' ' + h + '시 ' + mStr;
+    document.getElementById('session-badge').textContent = pl + ' 세션';
+    document.getElementById('deadline-note').textContent = '마감: ' + pl + ' ' + h + '시 ' + mStr;
 
-    const timerPlanEl = document.getElementById('timer-plan');
-    timerPlanEl.innerHTML = marked.parse(plan);
-    activateCheckboxes(timerPlanEl);
+    const tp = document.getElementById('timer-plan');
+    tp.innerHTML = marked.parse(plan);
+    activateCheckboxes(tp);
 
-    // 체크리스트 초기화
     document.getElementById('checklist-card').classList.remove('show');
     renderChecklist();
 
     sessions.push({
-      label: periodLabel + ' 세션',
-      deadline: h + '시 ' + mStr,
-      plan,
+      label: pl + ' 세션', deadline: h + '시 ' + mStr, plan,
       startedAt: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
     });
 
-    showPage('page-timer');
+    showTrackerPage('page-timer');
     timerInterval = setInterval(tick, 1000);
     tick();
   }
 
-  /* ═══════════════════════════════════════════════
-     타이머 tick
-  ═══════════════════════════════════════════════ */
+  /* ── tick ── */
   function tick() {
     const remaining = deadlineTs - Date.now();
     const cd = document.getElementById('countdown');
@@ -473,42 +675,64 @@
 
     if (remaining <= 0) {
       clearInterval(timerInterval);
-      cd.textContent = '00:00:00';
-      pf.style.width = '0%';
-      showDone();
-      return;
+      cd.textContent = '00:00:00'; pf.style.width = '0%';
+      goToRuleScreen(); return;
     }
 
-    const totalSec = Math.floor(remaining / 1000);
-    const hh = Math.floor(totalSec / 3600);
-    const mm = Math.floor((totalSec % 3600) / 60);
-    const ss = totalSec % 60;
-    cd.textContent = String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
+    const s = Math.floor(remaining / 1000);
+    const hh = Math.floor(s / 3600), mm = Math.floor((s % 3600) / 60), ss = s % 60;
+    cd.textContent = [hh,mm,ss].map(n => String(n).padStart(2,'0')).join(':');
 
     const pct = Math.max(0, Math.min(100, (remaining / totalDuration) * 100));
     pf.style.width = pct.toFixed(1) + '%';
 
-    cd.classList.remove('warn','danger');
-    pf.classList.remove('warn','danger');
+    cd.classList.remove('warn','danger'); pf.classList.remove('warn','danger');
     if      (remaining < 10 * 60 * 1000) { cd.classList.add('danger'); pf.classList.add('danger'); }
     else if (remaining < 30 * 60 * 1000) { cd.classList.add('warn');   pf.classList.add('warn');   }
 
-    // 5분 이하 → 마무리 체크리스트 슬라이드 인
-    if (!checklistShown && remaining <= 5 * 60 * 1000) {
+    /* 30분 전 체크리스트 */
+    if (!checklistShown && remaining <= 30 * 60 * 1000) {
       checklistShown = true;
       document.getElementById('checklist-card').classList.add('show');
     }
   }
 
-  function endSession() { clearInterval(timerInterval); showDone(); }
+  function endSession() { clearInterval(timerInterval); goToRuleScreen(); }
 
-  /* ═══════════════════════════════════════════════
-     완료 화면
-  ═══════════════════════════════════════════════ */
+  /* ── 규칙 입력 화면 ── */
+  function goToRuleScreen() {
+    elapsedMin = Math.floor((Date.now() - sessionStart) / 60000);
+    document.getElementById('rule-input').value = '';
+    document.getElementById('rule-status').textContent = '';
+    document.getElementById('rule-status').className = 'rule-status';
+    showTrackerPage('page-rule');
+  }
+
+  /* ── 규칙 저장 (localStorage) ── */
+  function saveRule() {
+    const rule = document.getElementById('rule-input').value.trim();
+    if (!rule) { showDone(); return; }
+
+    const btn    = document.getElementById('rule-save-btn');
+    const status = document.getElementById('rule-status');
+    btn.disabled = true;
+
+    const now     = new Date();
+    const dateStr = now.toLocaleString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+
+    const existing = JSON.parse(localStorage.getItem(LS_RULES) || '[]');
+    existing.push({ date: dateStr, text: rule });
+    localStorage.setItem(LS_RULES, JSON.stringify(existing));
+
+    status.textContent = '✅ 저장 완료';
+    status.className = 'rule-status ok';
+    btn.disabled = false;
+    setTimeout(showDone, 700);
+  }
+
+  /* ── 완료 화면 ── */
   function showDone() {
-    const elapsed = Math.floor((Date.now() - sessionStart) / 60000);
-    const hh = Math.floor(elapsed / 60);
-    const mm = elapsed % 60;
+    const hh = Math.floor(elapsedMin / 60), mm = elapsedMin % 60;
     const timeStr = hh > 0 ? hh + '시간 ' + (mm > 0 ? mm + '분' : '') : mm + '분';
     document.getElementById('done-summary').textContent = '총 ' + timeStr.trim() + ' 업무했어요';
 
@@ -517,31 +741,135 @@
     sessions.forEach(s => {
       const div = document.createElement('div');
       div.className = 'history-item';
-      div.innerHTML =
-        '<p class="history-meta">' + s.label + ' · ' + s.startedAt + ' 시작 · ' + s.deadline + ' 마감</p>'
+      div.innerHTML = '<p class="history-meta">' + s.label + ' · ' + s.startedAt + ' 시작 · ' + s.deadline + ' 마감</p>'
         + '<div class="md-body" style="font-size:13px">' + marked.parse(s.plan) + '</div>';
       list.appendChild(div);
       activateCheckboxes(div);
     });
 
-    if (sessions.length > 0) document.getElementById('history-card').style.display = 'block';
-    showPage('page-done');
+    document.getElementById('history-card').style.display = sessions.length > 0 ? 'block' : 'none';
+    showTrackerPage('page-done');
   }
 
-  /* ═══════════════════════════════════════════════
-     재시작
-  ═══════════════════════════════════════════════ */
   function restart() {
     document.getElementById('plan-input').value = '';
     document.getElementById('plan-preview').innerHTML = '';
     document.getElementById('err-time').classList.remove('show');
     document.getElementById('err-plan').classList.remove('show');
-    switchTab('write');
+    switchPlanTab('write');
     sessionStart = null; deadlineTs = null; totalDuration = null;
-    showPage('page-setup');
+    showTrackerPage('page-setup');
   }
 
+  /* ════════════════════
+     체크리스트 편집기
+  ════════════════════ */
+  function initEditor() {
+    const saved = localStorage.getItem(LS_CHECKLIST) || '';
+    const ta = document.getElementById('checklist-editor');
+    if (ta.value !== saved) ta.value = saved;
+    syncChecklistPreview();
+  }
+
+  function syncChecklistPreview() {
+    const raw = document.getElementById('checklist-editor').value;
+    const el  = document.getElementById('checklist-preview');
+    el.innerHTML = raw ? marked.parse(raw) : '<span style="color:var(--text-hint)">내용을 입력하세요</span>';
+    activateCheckboxes(el);
+  }
+
+  function saveChecklist() {
+    const content = document.getElementById('checklist-editor').value.trim();
+    localStorage.setItem(LS_CHECKLIST, content);
+    showToast('✅ 저장되었습니다', 'ok');
+  }
+
+  /* .md 파일 불러오기 */
+  function loadChecklistFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('checklist-editor').value = ev.target.result;
+      syncChecklistPreview();
+      showToast('📂 ' + file.name + ' 불러왔어요', 'ok');
+    };
+    reader.readAsText(file, 'utf-8');
+    e.target.value = '';
+  }
+
+  /* .md 파일 내보내기 */
+  function downloadChecklist() {
+    const content = document.getElementById('checklist-editor').value || localStorage.getItem(LS_CHECKLIST) || '';
+    downloadFile('checklist.md', content);
+  }
+
+  /* ════════════════════
+     규칙 목록 뷰
+  ════════════════════ */
+  function renderRulesList() {
+    const rules = JSON.parse(localStorage.getItem(LS_RULES) || '[]');
+    const container = document.getElementById('rules-list');
+
+    if (rules.length === 0) {
+      container.innerHTML = '<p class="rules-empty">아직 저장된 규칙이 없어요.<br>업무 종료 후 배운 규칙을 입력해보세요.</p>';
+      return;
+    }
+
+    container.innerHTML = [...rules].reverse().map((r, i) =>
+      `<div class="rule-item">
+        <div class="rule-date">${r.date}</div>
+        <div class="rule-text">${escapeHtml(r.text)}</div>
+      </div>`
+    ).join('');
+  }
+
+  function downloadRules() {
+    const rules = JSON.parse(localStorage.getItem(LS_RULES) || '[]');
+    if (rules.length === 0) { showToast('저장된 규칙이 없어요', ''); return; }
+    let md = '# 업무 규칙\n\n';
+    rules.forEach(r => { md += `---\n**${r.date}**\n${r.text}\n\n`; });
+    downloadFile('rules.md', md);
+  }
+
+  function clearRules() {
+    if (!confirm('규칙 목록을 전체 삭제할까요?')) return;
+    localStorage.removeItem(LS_RULES);
+    renderRulesList();
+    showToast('삭제되었습니다', '');
+  }
+
+  /* ════════════════════
+     공통 유틸
+  ════════════════════ */
+  function downloadFile(filename, content) {
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast('⬇ ' + filename + ' 다운로드', 'ok');
+  }
+
+  function escapeHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  let toastTimer;
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (type ? ' ' + type : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  /* ════════════════════
+     초기화
+  ════════════════════ */
   buildHours();
+  initEditor();
 </script>
 </body>
 </html>
